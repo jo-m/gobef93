@@ -1,9 +1,6 @@
 package befunge
 
-import (
-	"errors"
-)
-
+// TODO: optimize, keep same slice and separate stack pointer
 type stack struct {
 	s []int
 }
@@ -13,10 +10,10 @@ func (s *stack) push(val int) {
 	// log.Println("push, stack is now", s.s)
 }
 
-func (s *stack) pop() (int, error) {
+func (s *stack) pop() int {
 	l := len(s.s)
 	if l < 1 {
-		return 0, errors.New("pop on empty stack")
+		return 0
 	}
 
 	ret := s.s[l-1]
@@ -24,24 +21,10 @@ func (s *stack) pop() (int, error) {
 
 	// log.Println("pop, val / stack", ret, s.s)
 
-	return ret, nil
+	return ret
 }
 
-func (s *stack) pop2() (int, int, error) {
-	l := len(s.s)
-	if l < 2 {
-		return 0, 0, errors.New("pop2 on empty stack")
-	}
-
-	ret0, err := s.pop()
-	if err != nil {
-		panic("should not happen")
-	}
-
-	ret1, err := s.pop()
-	if err != nil {
-		panic("should not happen")
-	}
-
-	return ret0, ret1, nil
+func (s *stack) pop2() (int, int) {
+	a, b := s.pop(), s.pop()
+	return a, b
 }

@@ -72,51 +72,34 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 	switch op {
 	case opAdd:
 		log.Println("opAdd")
-		a, b, err := p.stack.pop2()
-		if err != nil {
-			return err
-		}
+		a, b := p.stack.pop2()
 		p.stack.push(a + b)
 		log.Printf("opAdd %d+%d=%d", a, b, a+b)
 	case opSub:
 		log.Println("opSub")
-		a, b, err := p.stack.pop2()
-		if err != nil {
-			return err
-		}
+		a, b := p.stack.pop2()
 		p.stack.push(b - a)
 		log.Printf("opSub %d-%d=%d", b, a, b-a)
 	case opMul:
 		log.Println("opMul")
-		a, b, err := p.stack.pop2()
-		if err != nil {
-			return err
-		}
+		a, b := p.stack.pop2()
 		p.stack.push(a * b)
 		log.Printf("opMul %d*%d=%d", a, b, a*b)
 	case opDiv:
 		log.Println("opDiv")
-		a, b, err := p.stack.pop2()
-		if err != nil {
-			return err
-		}
+		a, b := p.stack.pop2()
 		// TODO div by 0
 		p.stack.push(b / a)
 		log.Printf("opDiv %d/%d=%d", b, a, b/a)
 	case opMod:
 		log.Println("opMod")
-		a, b, err := p.stack.pop2()
-		if err != nil {
-			return err
-		}
+		a, b := p.stack.pop2()
+		// TODO div by 0
 		p.stack.push(b % a)
 		log.Printf("opMod %d%%%d=%d", b, a, b%a)
 	case opNot:
 		log.Println("opNot")
-		a, err := p.stack.pop()
-		if err != nil {
-			return err
-		}
+		a := p.stack.pop()
 		if a == 0 {
 			p.stack.push(1)
 		} else {
@@ -125,10 +108,7 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		log.Printf("opNot !%d", a)
 	case opGt:
 		log.Println("opGt")
-		a, b, err := p.stack.pop2()
-		if err != nil {
-			return err
-		}
+		a, b := p.stack.pop2()
 		if b > a {
 			p.stack.push(1)
 		} else {
@@ -152,10 +132,7 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		log.Println("opRand", p.dir)
 	case opRif:
 		log.Println("opRif")
-		a, err := p.stack.pop()
-		if err != nil {
-			return err
-		}
+		a := p.stack.pop()
 		if a == 0 {
 			p.dir = dirRight
 		} else {
@@ -164,10 +141,7 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		log.Println("opRif", p.dir)
 	case opDif:
 		log.Println("opDif")
-		a, err := p.stack.pop()
-		if err != nil {
-			return err
-		}
+		a := p.stack.pop()
 		if a == 0 {
 			p.dir = dirDown
 		} else {
@@ -179,72 +153,45 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		log.Printf("string mode enabled: %t", p.strMode)
 	case opDup:
 		log.Println("opDup")
-		a, err := p.stack.pop()
-		if err != nil {
-			return err
-		}
+		a := p.stack.pop()
 		p.stack.push(a)
 		p.stack.push(a)
 		log.Println("opDup", a)
 	case opSwp:
 		log.Println("opSwp")
-		a, b, err := p.stack.pop2()
-		if err != nil {
-			return err
-		}
+		a, b := p.stack.pop2()
 		p.stack.push(a)
 		p.stack.push(b)
 		log.Println("opSwp", a, b)
 	case opPop:
 		log.Println("opPop")
-		_, err := p.stack.pop()
-		if err != nil {
-			return err
-		}
+		_ = p.stack.pop()
 	case opPopWrtInt:
 		log.Println("opPopWrtInt")
-		a, err := p.stack.pop()
-		if err != nil {
-			return err
-		}
+		a := p.stack.pop()
 		str := []byte(fmt.Sprint(a))
 		n, err := out.Write(str)
 		if n != len(str) {
-			return errors.New("failed to write")
-		}
-		if err != nil {
-			return err
+			return fmt.Errorf("failed to write: %w", err)
 		}
 	case opPopWrtChr:
 		log.Println("opPopWrtChr")
-		chr, err := p.stack.pop()
-		if err != nil {
-			return err
-		}
+		chr := p.stack.pop()
 		if chr < 0 || chr > math.MaxUint8 {
 			return errors.New("overflow")
 		}
 		c := byte(chr)
 		n, err := out.Write([]byte{c})
 		if n != 1 {
-			return errors.New("failed to write")
-		}
-		if err != nil {
-			return err
+			return fmt.Errorf("failed to write: %w", err)
 		}
 	case opSkip:
 		log.Println("opSkip")
 		p.advancePC()
 	case opPut:
 		log.Println("opPut")
-		y, x, err := p.stack.pop2()
-		if err != nil {
-			return err
-		}
-		val, err := p.stack.pop()
-		if err != nil {
-			return err
-		}
+		y, x := p.stack.pop2()
+		val := p.stack.pop()
 		y = (y + p.h) % p.h
 		x = (x + p.w) % p.w
 		str := []byte(p.code[y])
@@ -253,10 +200,7 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		log.Println("opPut", x, y, val)
 	case opGet:
 		log.Println("opGet")
-		y, x, err := p.stack.pop2()
-		if err != nil {
-			return err
-		}
+		y, x := p.stack.pop2()
 		y = (y + p.h) % p.h
 		x = (x + p.w) % p.w
 		val := p.code[y][x]
