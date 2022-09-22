@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 type Prog struct {
@@ -24,7 +25,8 @@ type Prog struct {
 }
 
 func NewProg(code string) *Prog {
-	code = strings.TrimSpace(code)
+	code = strings.TrimLeft(code, "\n")
+	code = strings.TrimRightFunc(code, unicode.IsSpace)
 
 	prog := Prog{
 		code: strings.Split(code, "\n"),
@@ -250,7 +252,7 @@ func (p *Prog) Exec(in io.Reader, out, outErr io.Writer) error {
 			// string mode
 			log.Println("str push", op, iop)
 			p.stack.push(iop)
-		} else if iop >= int('0') && iop <= int('9') {
+		} else if unicode.IsDigit(rune(op)) {
 			// numbers
 			log.Println("num push", iop-int('0'))
 			p.stack.push(iop - int('0'))

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -10,9 +9,9 @@ import (
 )
 
 const code = `
->25*"!dlrow ,olleH":v
-                 v:,_@
-                 >  ^
+ >25*"!dlrow ,olleH":v
+                  v:,_@
+                  >  ^
 `
 
 func main() {
@@ -21,8 +20,9 @@ func main() {
 		panic("prog is nil")
 	}
 
+	// fmt.Println(prog.String())
+
 	log.SetOutput(io.Discard)
-	fmt.Println(prog.String())
 
 	err := prog.Exec(os.Stdin, os.Stdout, os.Stderr)
 	if err != nil {
