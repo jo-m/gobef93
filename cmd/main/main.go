@@ -13,7 +13,7 @@ const code = `
 `
 
 func main() {
-	prog := bef93.NewProg(code)
+	prog := bef93.NewProg(code, bef93.Opts{})
 	if prog == nil {
 		panic("prog is nil")
 	}

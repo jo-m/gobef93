@@ -15,7 +15,7 @@ v,,,,,,"World!"<
 
 func Test_NewProg93(t *testing.T) {
 
-	prog := NewProg(code)
+	prog := NewProg(code, Opts{})
 
 	if prog == nil {
 		t.Fatalf("prog is nil")
@@ -24,7 +24,7 @@ func Test_NewProg93(t *testing.T) {
 
 func Test_Exec(t *testing.T) {
 
-	prog := NewProg(code)
+	prog := NewProg(code, Opts{})
 	if prog == nil {
 		t.Fatalf("prog is nil")
 	}

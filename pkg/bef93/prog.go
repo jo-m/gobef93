@@ -13,9 +13,10 @@ import (
 	"unicode"
 )
 
-// Option contains supported options.
+// Opts contains supported options.
 // See https://github.com/catseye/Befunge-93/blob/master/src/bef.c#L46.
-type Option struct {
+// Zero value is good to use and represents the default options.
+type Opts struct {
 	NoFixOffByOne                 bool
 	ReadErrorUndefined            bool
 	IgnoreUnsupportedInstructions bool
@@ -25,6 +26,7 @@ type Option struct {
 
 type Prog struct {
 	code []string
+	opts Opts
 	w, h int // size
 
 	done     bool // program has exited
@@ -34,12 +36,13 @@ type Prog struct {
 	stack    stack
 }
 
-func NewProg(code string) *Prog {
+func NewProg(code string, opts Opts) *Prog {
 	code = strings.TrimLeft(code, "\n")
 	code = strings.TrimRightFunc(code, unicode.IsSpace)
 
 	prog := Prog{
 		code: strings.Split(code, "\n"),
+		opts: opts,
 	}
 
 	prog.h = len(prog.code)
