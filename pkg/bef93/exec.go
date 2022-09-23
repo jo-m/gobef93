@@ -87,6 +87,7 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		log.Println("dirDown")
 		p.dir = dirDown
 	case opRand:
+		// TODO: allow to seed rand
 		p.dir = direction(rand.Intn(int(dirEND)))
 		log.Println("opRand", p.dir)
 	case opRif:
@@ -130,6 +131,7 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		a := p.stack.pop()
 		str := []byte(fmt.Sprint(a))
 		n, err := out.Write(str)
+		// TODO: how to do io error handling
 		if n != len(str) {
 			return fmt.Errorf("failed to write: %w", err)
 		}
@@ -141,6 +143,7 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		}
 		c := byte(chr)
 		n, err := out.Write([]byte{c})
+		// TODO: how to do io error handling
 		if n != 1 {
 			return fmt.Errorf("failed to write: %w", err)
 		}
@@ -153,6 +156,7 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		val := p.stack.pop()
 		y = (y + p.h) % p.h
 		x = (x + p.w) % p.w
+		// TODO: how to handle overflow
 		str := []byte(p.code[y])
 		str[x] = byte(val)
 		p.code[y] = string(str)
@@ -163,10 +167,12 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		y = (y + p.h) % p.h
 		x = (x + p.w) % p.w
 		val := p.code[y][x]
+		// TODO: how to handle overflow
 		p.stack.push(int(val))
 		log.Println("opGet", x, y, val)
 	case opReadNr:
 		log.Println("opReadNr")
+		// TODO: how to handle overflow
 		_, err := fmt.Fprintln(outErr, "> Enter an integer and press Enter:")
 		if err != nil {
 			return err
@@ -183,6 +189,8 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		p.stack.push(int(val))
 		log.Println("opReadNr", int(val))
 	case opReadChr:
+		// TODO: implement
+		// TODO: how to handle overflow
 		panic("opReadChr not implemented")
 	case opEnd:
 		panic("should be handled in main loop")
