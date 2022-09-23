@@ -9,13 +9,11 @@ import (
 )
 
 const code = `
- >25*"!dlrow ,olleH":v
-                  v:,_@
-                  >  ^
+:0g,:"~"]#@_1+0"Quines are Fun">_
 `
 
 func main() {
-	prog := befunge.NewProg(code)
+	prog := befunge.NewProg93(code)
 	if prog == nil {
 		panic("prog is nil")
 	}

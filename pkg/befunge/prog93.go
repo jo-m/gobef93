@@ -13,7 +13,17 @@ import (
 	"unicode"
 )
 
-type Prog struct {
+// Option contains supported options.
+// See https://github.com/catseye/Befunge-93/blob/master/src/bef.c#L46.
+type Option struct {
+	NoFixOffByOne                 bool
+	ReadErrorUndefined            bool
+	IgnoreUnsupportedInstructions bool
+	WrapLongLines                 bool
+	WrapHashInconsistently        bool
+}
+
+type Prog93 struct {
 	code []string
 	w, h int // size
 
@@ -24,11 +34,11 @@ type Prog struct {
 	stack    stack
 }
 
-func NewProg(code string) *Prog {
+func NewProg93(code string) *Prog93 {
 	code = strings.TrimLeft(code, "\n")
 	code = strings.TrimRightFunc(code, unicode.IsSpace)
 
-	prog := Prog{
+	prog := Prog93{
 		code: strings.Split(code, "\n"),
 	}
 
@@ -47,15 +57,15 @@ func NewProg(code string) *Prog {
 	return &prog
 }
 
-func (p *Prog) String() string {
+func (p *Prog93) String() string {
 	return strings.Join(p.code, "\n")
 }
 
-func (p *Prog) currentOp() opcode {
+func (p *Prog93) currentOp() opcode {
 	return opcode(p.code[p.pcY][p.pcX])
 }
 
-func (p *Prog) advancePC() {
+func (p *Prog93) advancePC() {
 	switch p.dir {
 	case dirRight:
 		p.pcX = (p.pcX + 1) % p.w
@@ -70,7 +80,7 @@ func (p *Prog) advancePC() {
 	// log.Printf("new PC: %d, %d", p.pcX, p.pcY)
 }
 
-func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
+func (p *Prog93) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 	switch op {
 	case opAdd:
 		log.Println("opAdd")
@@ -238,7 +248,7 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 	return nil
 }
 
-func (p *Prog) Exec(in io.Reader, out, outErr io.Writer) error {
+func (p *Prog93) Exec(in io.Reader, out, outErr io.Writer) error {
 	if p.done {
 		return errors.New("already executed")
 	}

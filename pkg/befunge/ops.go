@@ -12,15 +12,15 @@ const (
 
 type opcode byte
 
+// https://github.com/catseye/Befunge-93/blob/master/doc/Befunge-93.markdown#appendix-a-command-summary
 const (
-	opAdd = '+' // Addition: Pop a and b, then push a+b
-	opSub = '-' // Subtraction: Pop a and b, then push b-a
-	opMul = '*' // Multiplication: Pop a and b, then push a*b
-	opDiv = '/' // Integer division: Pop a and b, then push b/a, rounded towards 0.
-	opMod = '%' // Modulo: Pop a and b, then push the remainder of the integer division of b/a.
-	opNot = '!' // Logical NOT: Pop a value. If the value is zero, push 1; otherwise, push zero.
-	// TODO: change back to `
-	opGt         = '['  // Greater than: Pop a and b, then push 1 if b>a, otherwise zero.
+	opAdd        = '+'  // Addition: Pop a and b, then push a+b
+	opSub        = '-'  // Subtraction: Pop a and b, then push b-a
+	opMul        = '*'  // Multiplication: Pop a and b, then push a*b
+	opDiv        = '/'  // Integer division: Pop a and b, then push b/a, rounded towards 0.
+	opMod        = '%'  // Modulo: Pop a and b, then push the remainder of the integer division of b/a.
+	opNot        = '!'  // Logical NOT: Pop a value. If the value is zero, push 1; otherwise, push zero.
+	opGt         = '`'  // Greater than: Pop a and b, then push 1 if b>a, otherwise zero.
 	opRight      = '>'  // Start moving right
 	opLeft       = '<'  // Start moving left
 	opUp         = '^'  // Start moving up

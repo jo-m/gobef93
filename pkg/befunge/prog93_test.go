@@ -13,9 +13,9 @@ v,,,,,,"World!"<
 >25*,@
 `
 
-func Test_NewProg(t *testing.T) {
+func Test_NewProg93(t *testing.T) {
 
-	prog := NewProg(code)
+	prog := NewProg93(code)
 
 	if prog == nil {
 		t.Fatalf("prog is nil")
@@ -24,7 +24,7 @@ func Test_NewProg(t *testing.T) {
 
 func Test_Exec(t *testing.T) {
 
-	prog := NewProg(code)
+	prog := NewProg93(code)
 	if prog == nil {
 		t.Fatalf("prog is nil")
 	}
