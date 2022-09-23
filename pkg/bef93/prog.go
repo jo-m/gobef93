@@ -1,4 +1,4 @@
-package befunge
+package bef93
 
 import (
 	"bufio"
@@ -23,7 +23,7 @@ type Option struct {
 	WrapHashInconsistently        bool
 }
 
-type Prog93 struct {
+type Prog struct {
 	code []string
 	w, h int // size
 
@@ -34,11 +34,11 @@ type Prog93 struct {
 	stack    stack
 }
 
-func NewProg93(code string) *Prog93 {
+func NewProg(code string) *Prog {
 	code = strings.TrimLeft(code, "\n")
 	code = strings.TrimRightFunc(code, unicode.IsSpace)
 
-	prog := Prog93{
+	prog := Prog{
 		code: strings.Split(code, "\n"),
 	}
 
@@ -57,15 +57,15 @@ func NewProg93(code string) *Prog93 {
 	return &prog
 }
 
-func (p *Prog93) String() string {
+func (p *Prog) String() string {
 	return strings.Join(p.code, "\n")
 }
 
-func (p *Prog93) currentOp() opcode {
+func (p *Prog) currentOp() opcode {
 	return opcode(p.code[p.pcY][p.pcX])
 }
 
-func (p *Prog93) advancePC() {
+func (p *Prog) advancePC() {
 	switch p.dir {
 	case dirRight:
 		p.pcX = (p.pcX + 1) % p.w
@@ -80,7 +80,7 @@ func (p *Prog93) advancePC() {
 	// log.Printf("new PC: %d, %d", p.pcX, p.pcY)
 }
 
-func (p *Prog93) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
+func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 	switch op {
 	case opAdd:
 		log.Println("opAdd")
@@ -248,7 +248,7 @@ func (p *Prog93) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error 
 	return nil
 }
 
-func (p *Prog93) Exec(in io.Reader, out, outErr io.Writer) error {
+func (p *Prog) Exec(in io.Reader, out, outErr io.Writer) error {
 	if p.done {
 		return errors.New("already executed")
 	}

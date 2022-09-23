@@ -1,4 +1,4 @@
-package befunge
+package bef93
 
 // TODO: optimize, keep same slice and separate stack pointer
 type stack struct {

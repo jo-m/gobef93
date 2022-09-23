@@ -1,4 +1,4 @@
-package befunge
+package bef93
 
 type direction uint8
 

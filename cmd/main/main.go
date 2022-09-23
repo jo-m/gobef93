@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/jo-m/gobefunge/pkg/befunge"
+	"github.com/jo-m/gobefunge/pkg/bef93"
 )
 
 const code = `
@@ -13,7 +13,7 @@ const code = `
 `
 
 func main() {
-	prog := befunge.NewProg93(code)
+	prog := bef93.NewProg(code)
 	if prog == nil {
 		panic("prog is nil")
 	}
