@@ -2,6 +2,7 @@ package bef93
 
 // TODO: optimize, keep same slice and separate stack pointer
 type stack struct {
+	// TODO: change type to signed long
 	s []int
 }
 

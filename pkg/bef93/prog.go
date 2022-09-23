@@ -5,23 +5,32 @@ import (
 	"unicode"
 )
 
+const (
+	Width  = 80
+	Height = 25
+)
+
 // Opts contains supported options.
 // See https://github.com/catseye/Befunge-93/blob/master/src/bef.c#L46.
 // Zero value is good to use and represents the default options.
 type Opts struct {
-	NoFixOffByOne                 bool
-	ReadErrorUndefined            bool
-	IgnoreUnsupportedInstructions bool
-	WrapLongLines                 bool
-	WrapHashInconsistently        bool
+	NoFixOffByOne                 bool // TODO: implement
+	ReadErrorUndefined            bool // TODO: implement
+	IgnoreUnsupportedInstructions bool // TODO: implement
+	WrapLongLines                 bool // TODO: implement
+	WrapHashInconsistently        bool // TODO: implement
+
+	// non-standard options
+	AllowInfiniteCodeSize bool // TODO: implement
+	AllowUnicode          bool // TODO: implement
 }
 
 type Prog struct {
-	code []string
+	code []string // TODO: [][]rune
+	w, h int
 	opts Opts
-	w, h int // size
 
-	done     bool // program has exited
+	done     bool // program has exited // TODO: move to exec
 	dir      direction
 	pcX, pcY int  // program counter
 	strMode  bool // string mode active
@@ -31,6 +40,8 @@ type Prog struct {
 func NewProg(code string, opts Opts) *Prog {
 	code = strings.TrimLeft(code, "\n")
 	code = strings.TrimRightFunc(code, unicode.IsSpace)
+
+	// TODO check for ASCII/Unicode input
 
 	prog := Prog{
 		code: strings.Split(code, "\n"),
