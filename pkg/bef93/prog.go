@@ -26,38 +26,18 @@ type Opts struct {
 
 	// non-standard options
 	AllowArbitraryCodeSize bool // allow code of arbitrary size, code smaller than standard size will be padded to standard size
-	AllowUnicode           bool // TODO: implement
+	AllowUnicode           bool // allow unicode, this also allow writing/reading uniode via p and g ops
 }
 
 // Prog represents a Befunge-93 program.
 // Use NewProg() to get an instance.
 // Immutable after creation.
 type Prog struct {
-	code [][]rune // TODO: deep-copy for execution
+	code [][]rune
 	w, h int
 	opts Opts
 
-	// TODO move state to exec struct, to make this immutable
-	done     bool // program has exited // TODO: move to exec
-	dir      direction
-	pcX, pcY int  // program counter
-	strMode  bool // string mode active
-	stack    stack
-
 	noCopy sync.Mutex
-}
-
-type State struct {
-	dir      direction
-	pcX, pcY int  // program counter
-	strMode  bool // string mode active
-	stack    stack
-}
-
-type Proc struct {
-	prog  Prog
-	state State
-	done  bool
 }
 
 func isASCII(lines []string) (bool, int, int) {
@@ -171,7 +151,7 @@ func (p *Prog) String() string {
 	return b.String()
 }
 
-func (p *Prog) Copy() *Prog {
+func (p *Prog) Clone() *Prog {
 	code := make([][]rune, p.h)
 	for i, line := range p.code {
 		code[i] = make([]rune, len(line))

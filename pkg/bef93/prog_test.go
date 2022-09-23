@@ -111,7 +111,7 @@ v,,,,,,"World!"<                                                                
 	}
 }
 
-func Test_NewProg_Copy(t *testing.T) {
+func Test_NewProg_Clone(t *testing.T) {
 	const code = `>              v
 v  ,,,,,"Hello"<
 >48*,          v
@@ -128,7 +128,7 @@ v,,,,,,"World!"<
 		t.Fatalf("err is not is nil: %s", err)
 	}
 
-	cp := prog.Copy()
+	cp := prog.Clone()
 
 	if cp.String() != prog.String() {
 		t.Fatal("strings are not equal")
