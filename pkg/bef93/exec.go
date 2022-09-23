@@ -157,9 +157,7 @@ func (p *Prog) handleOp(op opcode, in io.Reader, out, outErr io.Writer) error {
 		y = (y + p.h) % p.h
 		x = (x + p.w) % p.w
 		// TODO: how to handle overflow
-		str := []byte(p.code[y])
-		str[x] = byte(val)
-		p.code[y] = string(str)
+		p.code[y][x] = rune(val)
 		log.Println("opPut", x, y, val)
 	case opGet:
 		log.Println("opGet")
@@ -234,4 +232,8 @@ func (p *Prog) Exec(in io.Reader, out, outErr io.Writer) error {
 	}
 
 	panic("did not terminate")
+}
+
+func (p *Prog) currentOp() opcode {
+	return opcode(p.code[p.pcY][p.pcX])
 }
