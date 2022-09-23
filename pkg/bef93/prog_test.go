@@ -110,3 +110,31 @@ v,,,,,,"World!"<                                                                
 		t.Fatalf("invalid height %d", prog.h)
 	}
 }
+
+func Test_NewProg_Copy(t *testing.T) {
+	const code = `>              v
+v  ,,,,,"Hello"<
+>48*,          v
+v,,,,,,"World!"<
+>25*,@
+`
+	prog, err := NewProg(code, Opts{})
+
+	if prog == nil {
+		t.Fatalf("prog is nil")
+	}
+
+	if err != nil {
+		t.Fatalf("err is not is nil: %s", err)
+	}
+
+	cp := prog.Copy()
+
+	if cp.String() != prog.String() {
+		t.Fatal("strings are not equal")
+	}
+
+	if cp == prog {
+		t.Fatal("structs are equal")
+	}
+}

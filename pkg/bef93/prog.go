@@ -25,7 +25,7 @@ type Opts struct {
 	WrapHashInconsistently        bool // TODO: implement
 
 	// non-standard options
-	AllowArbitraryCodeSize bool // allow code of arbitrary size, code smaller than standard size will still be padded to standard size
+	AllowArbitraryCodeSize bool // allow code of arbitrary size, code smaller than standard size will be padded to standard size
 	AllowUnicode           bool // TODO: implement
 }
 
@@ -169,4 +169,19 @@ func (p *Prog) String() string {
 	}
 
 	return b.String()
+}
+
+func (p *Prog) Copy() *Prog {
+	code := make([][]rune, p.h)
+	for i, line := range p.code {
+		code[i] = make([]rune, len(line))
+		copy(line, code[i])
+	}
+
+	return &Prog{
+		code: code,
+		w:    p.w,
+		h:    p.h,
+		opts: p.opts,
+	}
 }
