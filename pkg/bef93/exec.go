@@ -38,7 +38,6 @@ func (p *Proc) Exec() error {
 	}
 }
 
-// TODO make usage consistent and sensible
 func (p *Proc) newRuntimeError(err error) *RuntimeError {
 	return &RuntimeError{
 		Msg:  err.Error(),
@@ -258,8 +257,7 @@ func (p *Proc) handleOp(op opcode) error {
 	case opWhitespace:
 		// do nothing
 	default:
-		return p.newRuntimeError(fmt.Errorf("code '%s' (%d): %w", string(op), int64(op), ErrUnknownOpCode))
-		// return fmt.Errorf("unknown opcode '%c' at (%d,%d)", op, p.pcX, p.pcY)
+		return p.newRuntimeError(fmt.Errorf("%w: '%s' (%d)", ErrUnknownOpCode, string(op), int64(op)))
 	}
 
 	return nil

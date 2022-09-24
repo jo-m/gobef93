@@ -38,7 +38,7 @@ type RuntimeError struct {
 var _ error = (*RuntimeError)(nil)
 
 func (e *RuntimeError) Error() string {
-	return fmt.Sprintf("runtime error at %d, %d: %s", e.LocX, e.LocY, e.Msg)
+	return fmt.Sprintf("runtime error at (%d, %d): %s", e.LocX, e.LocY, e.Msg)
 }
 
 func (e *RuntimeError) Unwrap() error { return e.cause }
