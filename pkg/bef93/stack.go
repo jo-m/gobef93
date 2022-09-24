@@ -1,29 +1,40 @@
 package bef93
 
-import "sync"
+import (
+	"sync"
+)
 
-// TODO: optimize, keep same slice and separate stack pointer
+const initSize = 1 << 6
+
 type stack struct {
-	s []int64
+	s  []int64
+	sp int
 
 	//lint:ignore U1000 ignore unused copy guard
 	noCopy sync.Mutex
 }
 
 func (s *stack) push(val int64) {
-	s.s = append(s.s, val)
+	if len(s.s) == 0 {
+		s.s = make([]int64, initSize)
+	}
+
+	if len(s.s) == s.sp {
+		s.s = append(s.s, make([]int64, len(s.s))...)
+	}
+
+	s.s[s.sp] = val
+	s.sp++
 }
 
 func (s *stack) pop() int64 {
-	l := len(s.s)
-	if l < 1 {
+	s.sp--
+	if s.sp < 0 {
+		s.sp = 0
 		return 0
 	}
 
-	ret := s.s[l-1]
-	s.s = s.s[:l-1]
-
-	return ret
+	return s.s[s.sp]
 }
 
 func (s *stack) pop2() (int64, int64) {
@@ -35,6 +46,7 @@ func (s *stack) clone() stack {
 	copy(arr, s.s)
 
 	return stack{
-		s: arr,
+		s:  arr,
+		sp: s.sp,
 	}
 }
