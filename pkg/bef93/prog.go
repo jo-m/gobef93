@@ -31,15 +31,12 @@ type Opts struct {
 
 // Prog represents a Befunge-93 program.
 // Use NewProg() to get an instance.
-// Because the code can be modified during execution,
-// you should not pass around references outside of
-// execution context.
 type Prog struct {
 	code [][]rune
 	w, h int
 	opts Opts
 
-	// lint:ignore U1000 ignore unused copy guard.
+	//lint:ignore U1000 ignore unused copy guard.
 	// Do not create naive struct copies, use p.Clone() instead.
 	noCopy sync.Mutex
 }
