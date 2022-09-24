@@ -134,7 +134,7 @@ v,,,,,,"World!"<
 		t.Fatal("strings are not equal")
 	}
 
-	if cp == prog {
+	if &cp == prog {
 		t.Fatal("structs are equal")
 	}
 }

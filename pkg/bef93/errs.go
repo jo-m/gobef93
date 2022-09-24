@@ -1,5 +1,7 @@
 package bef93
 
+import "fmt"
+
 type CompilationError struct {
 	Msg        string // error message
 	LocX, LocY int    // error location in code
@@ -35,12 +37,8 @@ type RuntimeError struct {
 // compile time interface check
 var _ error = (*RuntimeError)(nil)
 
-func (e *RuntimeError) Error() string { return e.Msg }
+func (e *RuntimeError) Error() string {
+	return fmt.Sprintf("runtime error at %d, %d: %s", e.LocX, e.LocY, e.Msg)
+}
 
 func (e *RuntimeError) Unwrap() error { return e.cause }
-
-// Backtrace returns a user-friendly error message describing the state of the program
-// that led to this error.
-func (e *RuntimeError) Backtrace() string {
-	panic("not implemented") // TODO: implement
-}

@@ -24,19 +24,23 @@ type Opts struct {
 	WrapLongLines                 bool // TODO: implement
 	WrapHashInconsistently        bool // TODO: implement
 
-	// non-standard options
-	AllowArbitraryCodeSize bool // allow code of arbitrary size, code smaller than standard size will be padded to standard size
-	AllowUnicode           bool // allow unicode, this also allow writing/reading uniode via p and g ops
+	// Non-standard options.
+	AllowArbitraryCodeSize bool // Allow code of arbitrary size, code smaller than standard size will be padded to standard size.
+	AllowUnicode           bool // Allow unicode, this also allow writing/reading uniode via 'p' and 'g' ops.
 }
 
 // Prog represents a Befunge-93 program.
 // Use NewProg() to get an instance.
-// Immutable after creation.
+// Because the code can be modified during execution,
+// you should not pass around references outside of
+// execution context.
 type Prog struct {
 	code [][]rune
 	w, h int
 	opts Opts
 
+	// lint:ignore U1000 ignore unused copy guard.
+	// Do not create naive struct copies, use p.Clone() instead.
 	noCopy sync.Mutex
 }
 
@@ -52,7 +56,6 @@ func isASCII(lines []string) (bool, int, int) {
 	return true, 0, 0
 }
 
-// returns max size, and its location
 func getMaxSize(lines []string) (w, h int) {
 	h = len(lines)
 
@@ -151,14 +154,14 @@ func (p *Prog) String() string {
 	return b.String()
 }
 
-func (p *Prog) Clone() *Prog {
+func (p *Prog) Clone() Prog {
 	code := make([][]rune, p.h)
 	for i, line := range p.code {
 		code[i] = make([]rune, len(line))
-		copy(line, code[i])
+		copy(code[i], line)
 	}
 
-	return &Prog{
+	return Prog{
 		code: code,
 		w:    p.w,
 		h:    p.h,

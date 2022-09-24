@@ -13,3 +13,4 @@ TODOs
 - [ ] make max iterations configurable
 - [ ] make programs reusable
 - [ ] MAYBE add optional unicode support
+- [ ] add linters, document all public types/methods
