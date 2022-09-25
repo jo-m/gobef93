@@ -148,7 +148,7 @@ func (p *Proc) handleOp(op opcode) error {
 	case opMod:
 		log.Println("opMod")
 		a, b := p.stack.pop2()
-		// this is not handled in standard Befunge93
+		// in the reference implementation, this is not handled and would crash
 		if a == 0 {
 			return p.newRuntimeError(fmt.Errorf("%w: %d %% %d", ErrDivZero, a, b))
 		}
@@ -239,8 +239,11 @@ func (p *Proc) handleOp(op opcode) error {
 	case opPopWrtChr:
 		log.Println("opPopWrtChr")
 		chr := p.stack.pop()
-		c := byte(chr) // TODO unicode support
-		n, err := p.out.Write([]byte{c})
+		c := rune(chr)
+		if !p.prog.opts.AllowUnicode {
+			c = rune(byte(c))
+		}
+		n, err := p.out.Write([]byte(string([]rune{c})))
 		if p.prog.opts.TerminateOnIOErr {
 			if err != nil {
 				return p.newRuntimeError(err)
@@ -256,29 +259,36 @@ func (p *Proc) handleOp(op opcode) error {
 		log.Println("opPut")
 		y, x := p.stack.pop2()
 		val := p.stack.pop()
-		// TODO how to handle out of bounds
+		// TODO handle out of bounds
 		y = (y + int64(p.prog.h)) % int64(p.prog.h)
 		x = (x + int64(p.prog.w)) % int64(p.prog.w)
-		// TODO: handle unicode
-		p.prog.code[y][x] = rune(val)
+		if !p.prog.opts.AllowUnicode {
+			p.prog.code[y][x] = rune(byte(val))
+		} else {
+			p.prog.code[y][x] = rune(val)
+		}
 		log.Println("opPut", x, y, val)
 	case opGet:
 		log.Println("opGet")
 		y, x := p.stack.pop2()
-		// TODO how to handle out of bounds
+		// TODO handle out of bounds
 		y = (y + int64(p.prog.h)) % int64(p.prog.h)
 		x = (x + int64(p.prog.w)) % int64(p.prog.w)
 		val := p.prog.code[y][x]
-		// TODO: handle unicode
-		p.stack.push(int64(val))
+		if !p.prog.opts.AllowUnicode {
+			p.stack.push(int64(byte(val)))
+		} else {
+			p.stack.push(int64(val))
+		}
 		log.Println("opGet", x, y, val)
 	case opReadNr:
 		log.Println("opReadNr")
 		val, err := readInt(p.in)
-		if err != nil && p.prog.opts.TerminateOnIOErr {
-			return p.newRuntimeError(err)
-		}
 		if err != nil {
+			if p.prog.opts.TerminateOnIOErr {
+				return p.newRuntimeError(err)
+			}
+
 			if p.prog.opts.ReadErrorUndefined {
 				// simulate "undefined" by using rand
 				val = p.rand.Int63()
@@ -292,6 +302,7 @@ func (p *Proc) handleOp(op opcode) error {
 		p.stack.push(val)
 		log.Println("opReadNr", int(val))
 	case opReadChr:
+		// TODO: this does not allow unicode
 		buf := []byte{0}
 		n, err := p.in.Read(buf)
 		if err != nil && p.prog.opts.TerminateOnIOErr {

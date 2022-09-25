@@ -16,8 +16,9 @@ const (
 
 // Opts contains supported options.
 // See https://github.com/catseye/Befunge-93/blob/master/src/bef.c#L46.
-// Zero value is good to use and represents the default options.
+// Zero value is good to use and represents the default (standard 93) options.
 type Opts struct {
+	// Options equal to reference implementation.
 	NoFixOffByOne                 bool // TODO: implement
 	ReadErrorUndefined            bool // TODO: implement
 	IgnoreUnsupportedInstructions bool // TODO: implement
@@ -27,9 +28,9 @@ type Opts struct {
 	// Non-standard options.
 	AllowArbitraryCodeSize bool  // Allow code of arbitrary size, code smaller than standard size will be padded to standard size.
 	AllowUnicode           bool  // Allow unicode, this also allow writing/reading uniode via 'p' and 'g' ops.
-	DisallowDivZero        bool  // TODO implement
+	DisallowDivZero        bool  // Terminate on division by 0.
 	RandSeed               int64 // Fixed random seed. If 0, the generator is seeded randomly internally.
-	TerminateOnIOErr       bool  // TODO implement
+	TerminateOnIOErr       bool  // Terminate on IO errors instead of ignoring them.
 }
 
 // Prog represents a Befunge-93 program.
