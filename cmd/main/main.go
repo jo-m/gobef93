@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"log"
 	"os"
 
 	"github.com/jo-m/gobefunge/pkg/bef93"
@@ -19,8 +17,6 @@ func main() {
 	fmt.Println(prog.String())
 
 	proc := bef93.NewProc(prog, os.Stdin, os.Stdout, os.Stderr)
-
-	log.SetOutput(io.Discard)
 
 	err = proc.Exec()
 	if err != nil {

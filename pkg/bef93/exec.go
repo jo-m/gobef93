@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -65,8 +64,6 @@ func (p *Proc) advancePC() {
 	case dirUp:
 		p.pcY = (p.pcY - 1 + p.prog.h) % p.prog.h
 	}
-
-	// log.Printf("new PC: %d, %d", p.pcX, p.pcY)
 }
 
 func (p *Proc) step() error {
@@ -74,10 +71,8 @@ func (p *Proc) step() error {
 	iop := int64(op)
 
 	if p.strMode && op != opStr {
-		log.Println("str push", op, iop)
 		p.stack.push(iop)
 	} else if strings.Contains("0123456789", string(op)) {
-		log.Println("num push", iop-int64('0'))
 		p.stack.push(iop - int64('0'))
 	} else {
 		err := p.handleOp(op)
@@ -107,22 +102,15 @@ func readInt(in io.Reader) (int64, error) {
 func (p *Proc) handleOp(op opcode) error {
 	switch op {
 	case opAdd:
-		log.Println("opAdd")
 		a, b := p.stack.pop2()
 		p.stack.push(a + b)
-		log.Printf("opAdd %d+%d=%d", a, b, a+b)
 	case opSub:
-		log.Println("opSub")
 		a, b := p.stack.pop2()
 		p.stack.push(b - a)
-		log.Printf("opSub %d-%d=%d", b, a, b-a)
 	case opMul:
-		log.Println("opMul")
 		a, b := p.stack.pop2()
 		p.stack.push(a * b)
-		log.Printf("opMul %d*%d=%d", a, b, a*b)
 	case opDiv:
-		log.Println("opDiv")
 		a, b := p.stack.pop2()
 		if a == 0 {
 			if p.prog.opts.DisallowDivZero {
@@ -144,87 +132,64 @@ func (p *Proc) handleOp(op opcode) error {
 			p.stack.push(b / a)
 		}
 
-		log.Printf("opDiv %d/%d=%d", b, a, b/a)
 	case opMod:
-		log.Println("opMod")
 		a, b := p.stack.pop2()
 		// in the reference implementation, this is not handled and would crash
 		if a == 0 {
 			return p.newRuntimeError(fmt.Errorf("%w: %d %% %d", ErrDivZero, a, b))
 		}
 		p.stack.push(b % a)
-		log.Printf("opMod %d%%%d=%d", b, a, b%a)
 	case opNot:
-		log.Println("opNot")
 		a := p.stack.pop()
 		if a == 0 {
 			p.stack.push(1)
 		} else {
 			p.stack.push(0)
 		}
-		log.Printf("opNot !%d", a)
 	case opGt:
-		log.Println("opGt")
 		a, b := p.stack.pop2()
 		if b > a {
 			p.stack.push(1)
 		} else {
 			p.stack.push(0)
 		}
-		log.Printf("opDiv %d>%d", b, a)
 	case opRight:
-		log.Println("dirRight")
 		p.dir = dirRight
 	case opLeft:
-		log.Println("dirLeft")
 		p.dir = dirLeft
 	case opUp:
-		log.Println("dirUp")
 		p.dir = dirUp
 	case opDown:
-		log.Println("dirDown")
 		p.dir = dirDown
 	case opRand:
 		p.dir = direction(p.rand.Intn(int(dirEND)))
-		log.Println("opRand", p.dir)
 	case opRif:
-		log.Println("opRif")
 		a := p.stack.pop()
 		if a == 0 {
 			p.dir = dirRight
 		} else {
 			p.dir = dirLeft
 		}
-		log.Println("opRif", p.dir)
 	case opDif:
-		log.Println("opDif")
 		a := p.stack.pop()
 		if a == 0 {
 			p.dir = dirDown
 		} else {
 			p.dir = dirUp
 		}
-		log.Println("opDif", p.dir)
 	case opStr:
 		p.strMode = !p.strMode
-		log.Printf("string mode enabled: %t", p.strMode)
 	case opDup:
-		log.Println("opDup")
 		a := p.stack.pop()
 		p.stack.push(a)
 		p.stack.push(a)
-		log.Println("opDup", a)
 	case opSwp:
-		log.Println("opSwp")
 		a, b := p.stack.pop2()
 		p.stack.push(a)
 		p.stack.push(b)
-		log.Println("opSwp", a, b)
 	case opPop:
-		log.Println("opPop")
 		_ = p.stack.pop()
 	case opPopWrtInt:
-		log.Println("opPopWrtInt")
 		a := p.stack.pop()
 		str := []byte(fmt.Sprint(a))
 		n, err := p.out.Write(str)
@@ -237,7 +202,6 @@ func (p *Proc) handleOp(op opcode) error {
 			}
 		}
 	case opPopWrtChr:
-		log.Println("opPopWrtChr")
 		chr := p.stack.pop()
 		c := rune(chr)
 		if !p.prog.opts.AllowUnicode {
@@ -253,10 +217,8 @@ func (p *Proc) handleOp(op opcode) error {
 			}
 		}
 	case opSkip:
-		log.Println("opSkip")
 		p.advancePC()
 	case opPut:
-		log.Println("opPut")
 		y, x := p.stack.pop2()
 		val := p.stack.pop()
 		// TODO handle out of bounds
@@ -267,9 +229,7 @@ func (p *Proc) handleOp(op opcode) error {
 		} else {
 			p.prog.code[y][x] = rune(val)
 		}
-		log.Println("opPut", x, y, val)
 	case opGet:
-		log.Println("opGet")
 		y, x := p.stack.pop2()
 		// TODO handle out of bounds
 		y = (y + int64(p.prog.h)) % int64(p.prog.h)
@@ -280,9 +240,7 @@ func (p *Proc) handleOp(op opcode) error {
 		} else {
 			p.stack.push(int64(val))
 		}
-		log.Println("opGet", x, y, val)
 	case opReadNr:
-		log.Println("opReadNr")
 		val, err := readInt(p.in)
 		if err != nil {
 			if p.prog.opts.TerminateOnIOErr {
@@ -300,7 +258,6 @@ func (p *Proc) handleOp(op opcode) error {
 			}
 		}
 		p.stack.push(val)
-		log.Println("opReadNr", int(val))
 	case opReadChr:
 		// TODO: this does not allow unicode
 		buf := []byte{0}
