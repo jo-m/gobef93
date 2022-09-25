@@ -2,7 +2,9 @@ package bef93
 
 import (
 	"io"
+	"math/rand"
 	"sync"
+	"time"
 )
 
 type Proc struct {
@@ -11,9 +13,11 @@ type Proc struct {
 	in          io.Reader
 	out, outErr io.Writer
 
+	rand *rand.Rand
+
 	dir      direction
-	pcX, pcY int  // program counter
-	strMode  bool // string mode active
+	pcX, pcY int
+	strMode  bool
 	stack    stack
 	done     bool
 
@@ -22,8 +26,15 @@ type Proc struct {
 }
 
 func NewProc(prog *Prog, in io.Reader, out, outErr io.Writer) *Proc {
+	seed := time.Now().UnixNano()
+	if prog.opts.RandSeed != 0 {
+		seed = prog.opts.RandSeed
+	}
+
 	return &Proc{
 		prog: prog.Clone(),
+
+		rand: rand.New(rand.NewSource(seed)),
 
 		in:     in,
 		out:    out,
@@ -31,13 +42,13 @@ func NewProc(prog *Prog, in io.Reader, out, outErr io.Writer) *Proc {
 	}
 }
 
-func (p *Proc) Clone() *Proc {
+func (p *Proc) Clone(in io.Reader, out, outErr io.Writer) *Proc {
 	return &Proc{
 		prog: p.prog.Clone(),
 
-		in:     p.in,
-		out:    p.out,
-		outErr: p.outErr,
+		in:     in,
+		out:    out,
+		outErr: outErr,
 
 		dir:     p.dir,
 		pcX:     p.pcX,

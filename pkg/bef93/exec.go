@@ -4,9 +4,8 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"log"
-	"math"
-	"math/rand"
 	"strconv"
 	"strings"
 )
@@ -14,6 +13,8 @@ import (
 var (
 	ErrTerminated    = errors.New("process already executed")
 	ErrUnknownOpCode = errors.New("unknown opcode")
+	ErrDivZero       = errors.New("division by zero")
+	ErrWroteNothing  = errors.New("wrote 0 bytes")
 )
 
 var (
@@ -89,6 +90,20 @@ func (p *Proc) step() error {
 	return nil
 }
 
+func readInt(in io.Reader) (int64, error) {
+	r := bufio.NewReader(in)
+	l, _, err := r.ReadLine()
+	if err != nil {
+		return 0, err
+	}
+	val, err := strconv.ParseInt(string(l), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return val, nil
+}
+
 func (p *Proc) handleOp(op opcode) error {
 	switch op {
 	case opAdd:
@@ -109,13 +124,34 @@ func (p *Proc) handleOp(op opcode) error {
 	case opDiv:
 		log.Println("opDiv")
 		a, b := p.stack.pop2()
-		// TODO div by 0
-		p.stack.push(b / a)
+		if a == 0 {
+			if p.prog.opts.DisallowDivZero {
+				return p.newRuntimeError(fmt.Errorf("%w: %d / %d", ErrDivZero, a, b))
+			}
+
+			fmt.Fprintf(p.outErr, "What do you want %d/0 to be?\n", b)
+			b, err := readInt(p.in)
+			if err != nil {
+				if p.prog.opts.TerminateOnIOErr {
+					return p.newRuntimeError(err)
+				}
+
+				b = 0
+			}
+
+			p.stack.push(b)
+		} else {
+			p.stack.push(b / a)
+		}
+
 		log.Printf("opDiv %d/%d=%d", b, a, b/a)
 	case opMod:
 		log.Println("opMod")
 		a, b := p.stack.pop2()
-		// TODO div by 0
+		// this is not handled in standard Befunge93
+		if a == 0 {
+			return p.newRuntimeError(fmt.Errorf("%w: %d %% %d", ErrDivZero, a, b))
+		}
 		p.stack.push(b % a)
 		log.Printf("opMod %d%%%d=%d", b, a, b%a)
 	case opNot:
@@ -149,8 +185,7 @@ func (p *Proc) handleOp(op opcode) error {
 		log.Println("dirDown")
 		p.dir = dirDown
 	case opRand:
-		// TODO: allow to seed rand
-		p.dir = direction(rand.Intn(int(dirEND)))
+		p.dir = direction(p.rand.Intn(int(dirEND)))
 		log.Println("opRand", p.dir)
 	case opRif:
 		log.Println("opRif")
@@ -193,21 +228,26 @@ func (p *Proc) handleOp(op opcode) error {
 		a := p.stack.pop()
 		str := []byte(fmt.Sprint(a))
 		n, err := p.out.Write(str)
-		// TODO: how to do io error handling
-		if n != len(str) {
-			return fmt.Errorf("failed to write: %w", err)
+		if p.prog.opts.TerminateOnIOErr {
+			if err != nil {
+				return p.newRuntimeError(err)
+			}
+			if n == 0 {
+				return p.newRuntimeError(ErrWroteNothing)
+			}
 		}
 	case opPopWrtChr:
 		log.Println("opPopWrtChr")
 		chr := p.stack.pop()
-		if chr < 0 || chr > math.MaxUint8 {
-			return errors.New("overflow")
-		}
-		c := byte(chr)
+		c := byte(chr) // TODO unicode support
 		n, err := p.out.Write([]byte{c})
-		// TODO: how to do io error handling
-		if n != 1 {
-			return fmt.Errorf("failed to write: %w", err)
+		if p.prog.opts.TerminateOnIOErr {
+			if err != nil {
+				return p.newRuntimeError(err)
+			}
+			if n == 0 {
+				return p.newRuntimeError(ErrWroteNothing)
+			}
 		}
 	case opSkip:
 		log.Println("opSkip")
@@ -216,42 +256,53 @@ func (p *Proc) handleOp(op opcode) error {
 		log.Println("opPut")
 		y, x := p.stack.pop2()
 		val := p.stack.pop()
+		// TODO how to handle out of bounds
 		y = (y + int64(p.prog.h)) % int64(p.prog.h)
 		x = (x + int64(p.prog.w)) % int64(p.prog.w)
-		// TODO: how to handle overflow
+		// TODO: handle unicode
 		p.prog.code[y][x] = rune(val)
 		log.Println("opPut", x, y, val)
 	case opGet:
 		log.Println("opGet")
 		y, x := p.stack.pop2()
+		// TODO how to handle out of bounds
 		y = (y + int64(p.prog.h)) % int64(p.prog.h)
 		x = (x + int64(p.prog.w)) % int64(p.prog.w)
 		val := p.prog.code[y][x]
-		// TODO: how to handle overflow
+		// TODO: handle unicode
 		p.stack.push(int64(val))
 		log.Println("opGet", x, y, val)
 	case opReadNr:
 		log.Println("opReadNr")
-		// TODO: how to handle overflow
-		_, err := fmt.Fprintln(p.outErr, "> Enter an integer and press Enter:")
-		if err != nil {
-			return err
+		val, err := readInt(p.in)
+		if err != nil && p.prog.opts.TerminateOnIOErr {
+			return p.newRuntimeError(err)
 		}
-		r := bufio.NewReader(p.in)
-		l, _, err := r.ReadLine()
 		if err != nil {
-			return err
+			if p.prog.opts.ReadErrorUndefined {
+				// simulate "undefined" by using rand
+				val = p.rand.Int63()
+				if p.rand.Intn(2) == 0 {
+					val = -val
+				}
+			} else {
+				val = -1
+			}
 		}
-		val, err := strconv.ParseInt(string(l), 10, 32)
-		if err != nil {
-			return err
-		}
-		p.stack.push(int64(val))
+		p.stack.push(val)
 		log.Println("opReadNr", int(val))
 	case opReadChr:
-		// TODO: implement
-		// TODO: how to handle overflow
-		panic("opReadChr not implemented")
+		buf := []byte{0}
+		n, err := p.in.Read(buf)
+		if err != nil && p.prog.opts.TerminateOnIOErr {
+			return p.newRuntimeError(err)
+		}
+		if n == 0 || err != nil {
+			// simulate EOF
+			p.stack.push(-1)
+		} else {
+			p.stack.push(int64(buf[0]))
+		}
 	case opEnd:
 		return errTerminated
 	case opWhitespace:

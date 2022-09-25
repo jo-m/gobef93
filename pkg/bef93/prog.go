@@ -25,8 +25,11 @@ type Opts struct {
 	WrapHashInconsistently        bool // TODO: implement
 
 	// Non-standard options.
-	AllowArbitraryCodeSize bool // Allow code of arbitrary size, code smaller than standard size will be padded to standard size.
-	AllowUnicode           bool // Allow unicode, this also allow writing/reading uniode via 'p' and 'g' ops.
+	AllowArbitraryCodeSize bool  // Allow code of arbitrary size, code smaller than standard size will be padded to standard size.
+	AllowUnicode           bool  // Allow unicode, this also allow writing/reading uniode via 'p' and 'g' ops.
+	DisallowDivZero        bool  // TODO implement
+	RandSeed               int64 // Fixed random seed. If 0, the generator is seeded randomly internally.
+	TerminateOnIOErr       bool  // TODO implement
 }
 
 // Prog represents a Befunge-93 program.
