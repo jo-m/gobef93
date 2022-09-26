@@ -18,14 +18,16 @@ const (
 // See https://github.com/catseye/Befunge-93/blob/master/src/bef.c#L46.
 // Zero value is good to use and represents the default (standard 93) options.
 type Opts struct {
-	// Options equal to reference implementation.
+	// Options (mostly) equal to reference implementation.
+
 	NoFixOffByOne                 bool // TODO: implement
-	ReadErrorUndefined            bool // TODO: implement
-	IgnoreUnsupportedInstructions bool // TODO: implement
+	ReadErrorUndefined            bool // If true, & will push an undefined number to stack instead of -1.
+	IgnoreUnsupportedInstructions bool // If true, unsupported instructions will be ignored. Note that unline the reference implementation, we terminate instead of just print an error on unsupported instructions by default.
 	WrapLongLines                 bool // TODO: implement
 	WrapHashInconsistently        bool // TODO: implement
 
 	// Non-standard options.
+
 	AllowArbitraryCodeSize bool  // Allow code of arbitrary size, code smaller than standard size will be padded to standard size.
 	AllowUnicode           bool  // Allow unicode, this also allow writing/reading uniode via 'p' and 'g' ops.
 	DisallowDivZero        bool  // Terminate on division by 0.
@@ -153,6 +155,15 @@ func (p *Prog) String() string {
 	}
 
 	return b.String()
+}
+
+func (p *Prog) Code() string {
+	ret := strings.Builder{}
+	for _, l := range p.code {
+		ret.WriteString(strings.TrimRight(string(l), " "))
+		ret.WriteByte('\n')
+	}
+	return strings.TrimSpace(ret.String())
 }
 
 func (p *Prog) Clone() Prog {

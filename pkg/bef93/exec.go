@@ -191,7 +191,7 @@ func (p *Proc) handleOp(op opcode) error {
 		_ = p.stack.pop()
 	case opPopWrtInt:
 		a := p.stack.pop()
-		str := []byte(fmt.Sprint(a))
+		str := []byte(fmt.Sprintf("%d ", a))
 		n, err := p.out.Write(str)
 		if p.prog.opts.TerminateOnIOErr {
 			if err != nil {
@@ -276,7 +276,11 @@ func (p *Proc) handleOp(op opcode) error {
 	case opWhitespace:
 		// do nothing
 	default:
-		return p.newRuntimeError(fmt.Errorf("%w: '%s' (%d)", ErrUnknownOpCode, string(op), int64(op)))
+		if p.prog.opts.IgnoreUnsupportedInstructions {
+			// do nothing
+		} else {
+			return p.newRuntimeError(fmt.Errorf("%w: '%s' (%d)", ErrUnknownOpCode, string(op), int64(op)))
+		}
 	}
 
 	return nil
