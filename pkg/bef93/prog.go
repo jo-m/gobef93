@@ -20,19 +20,35 @@ const (
 type Opts struct {
 	// Options (mostly) equal to reference implementation.
 
-	NoFixOffByOne                 bool // TODO: implement
-	ReadErrorUndefined            bool // If true, & will push an undefined number to stack instead of -1.
-	IgnoreUnsupportedInstructions bool // If true, unsupported instructions will be ignored. Note that unline the reference implementation, we terminate instead of just print an error on unsupported instructions by default.
-	WrapLongLines                 bool // TODO: implement
-	WrapHashInconsistently        bool // TODO: implement
+	// TODO: implement.
+	NoFixOffByOne bool
+	// If true, & will push an undefined number to stack instead of -1.
+	ReadErrorUndefined bool
+	// If true, unsupported instructions will be ignored.
+	// Note that unline the reference implementation, we
+	// terminate instead of just print an error on unsupported
+	// instructions by default.
+	IgnoreUnsupportedInstructions bool
+	// TODO: implement.
+	WrapLongLines bool
+	// TODO: implement.
+	WrapHashInconsistently bool
 
 	// Non-standard options.
 
-	AllowArbitraryCodeSize bool  // Allow code of arbitrary size, code smaller than standard size will be padded to standard size.
-	AllowUnicode           bool  // Allow unicode, this also allow writing/reading uniode via 'p' and 'g' ops.
-	DisallowDivZero        bool  // Terminate on division by 0.
-	RandSeed               int64 // Fixed random seed. If 0, the generator is seeded randomly internally.
-	TerminateOnIOErr       bool  // Terminate on IO errors instead of ignoring them.
+	// Allow code of arbitrary size, code smaller
+	// than standard size will be padded to standard size.
+	AllowArbitraryCodeSize bool
+	// Allow unicode, this also allow
+	// writing/reading uniode via 'p' and 'g' ops.
+	AllowUnicode bool
+	// Terminate on division by 0.
+	DisallowDivZero bool
+	// Fixed random seed. If 0, the generator
+	// is seeded randomly internally.
+	RandSeed int64
+	// Terminate on IO errors instead of ignoring them.
+	TerminateOnIOErr bool
 }
 
 // Prog represents a Befunge-93 program.
@@ -115,6 +131,16 @@ func NewProg(code string, opts Opts) (*Prog, error) {
 	runes := make([][]rune, h)
 	for i, l := range lines {
 		runes[i] = []rune(l)
+	}
+
+	if opts.NoFixOffByOne {
+		panic("option NoFixOffByOne: not implemented")
+	}
+	if opts.WrapLongLines {
+		panic("option WrapLongLines: not implemented")
+	}
+	if opts.WrapHashInconsistently {
+		panic("option WrapHashInconsistently: not implemented")
 	}
 
 	return &Prog{
