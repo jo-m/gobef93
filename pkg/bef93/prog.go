@@ -166,6 +166,10 @@ func (p *Prog) Code() string {
 	return strings.TrimSpace(ret.String())
 }
 
+func (p *Prog) Opts() Opts {
+	return p.opts
+}
+
 func (p *Prog) Clone() Prog {
 	code := make([][]rune, p.h)
 	for i, line := range p.code {

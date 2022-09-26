@@ -42,6 +42,11 @@ func NewProc(prog *Prog, in io.Reader, out, outErr io.Writer) *Proc {
 	}
 }
 
+func (p *Proc) Prog() *Prog {
+	prog := p.prog.Clone()
+	return &prog
+}
+
 func (p *Proc) Clone(in io.Reader, out, outErr io.Writer) *Proc {
 	return &Proc{
 		prog: p.prog.Clone(),
