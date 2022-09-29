@@ -7,9 +7,7 @@ import (
 	"github.com/jo-m/gobefunge/pkg/bef93"
 )
 
-const code = ` >25*"!dlrow ,olleH":v
-                  v:,_@
-                  >  ^`
+const code = `&&..@`
 
 func main() {
 	prog, err := bef93.NewProg(code, bef93.Opts{})
