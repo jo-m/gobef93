@@ -327,3 +327,41 @@ func Test_Exec_Get(t *testing.T) {
 		t.Fatal("should be equal")
 	}
 }
+
+func Test_Exec_AskNr(t *testing.T) {
+	out, _, err := exec2out(t, `&   &..@`, Opts{TerminateOnIOErr: true}, "76341\n987312\n")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	if out != "987312 76341 " {
+		t.Fatal("should be equal")
+	}
+}
+
+func Test_Exec_AskChr(t *testing.T) {
+	out, _, err := exec2out(t, `~ ~,,@`, Opts{TerminateOnIOErr: true}, "ab")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	if out != "ba" {
+		t.Fatal("should be equal")
+	}
+}
+
+func Test_Exec_Wraparound(t *testing.T) {
+	code := strings.TrimSpace(`
+>                      v
+                  
+             1.   ^    >
+                  @
+                  .
+                  2
+`)
+	out, _, err := exec2out(t, code, Opts{}, "")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	if out != "1 2 " {
+		t.Fatal("should be equal")
+	}
+}
