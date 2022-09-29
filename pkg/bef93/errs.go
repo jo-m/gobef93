@@ -2,6 +2,7 @@ package bef93
 
 import "fmt"
 
+// CompilationError represents a compile time error.
 type CompilationError struct {
 	Msg        string // error message
 	LocX, LocY int    // error location in code
@@ -12,7 +13,7 @@ type CompilationError struct {
 // compile time interface check
 var _ error = (*CompilationError)(nil)
 
-func NewCompilationError(err error, locX, locY int) *CompilationError {
+func newCompilationError(err error, locX, locY int) *CompilationError {
 	return &CompilationError{
 		Msg:  err.Error(),
 		LocX: locX,
@@ -26,10 +27,11 @@ func (e *CompilationError) Error() string { return e.Msg }
 
 func (e *CompilationError) Unwrap() error { return e.cause }
 
+// RuntimeError represents a runtime error.
 type RuntimeError struct {
-	Msg        string
-	Prog       Prog
-	LocX, LocY int
+	Msg        string // error message
+	Prog       Prog   // program at time of error
+	LocX, LocY int    // error location in code
 
 	cause error
 }

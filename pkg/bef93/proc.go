@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+// Proc represents a program in execution.
+// Do not copy by value. Use proc.Clone() to obtain copies.
+// Construct using NewProc().
 type Proc struct {
 	prog Prog
 
@@ -26,6 +29,8 @@ type Proc struct {
 	noCopy sync.Mutex
 }
 
+// NewProc creates a new Proc.
+// In is the new procs stdin, out stdout, outErr stderr.
 func NewProc(prog *Prog, in io.Reader, out, outErr io.Writer) *Proc {
 	seed := time.Now().UnixNano()
 	if prog.opts.RandSeed != 0 {
@@ -35,6 +40,7 @@ func NewProc(prog *Prog, in io.Reader, out, outErr io.Writer) *Proc {
 	return &Proc{
 		prog: prog.Clone(),
 
+		// #nosec G404 We want to be deterministic here.
 		rand: rand.New(rand.NewSource(seed)),
 
 		in:     bufio.NewReader(in),
@@ -43,11 +49,14 @@ func NewProc(prog *Prog, in io.Reader, out, outErr io.Writer) *Proc {
 	}
 }
 
+// Prog returns a copy of the current Prog inside the proc.
 func (p *Proc) Prog() *Prog {
 	prog := p.prog.Clone()
 	return &prog
 }
 
+// Clone returns a pointer to a deep copy of a proc.
+// You need to supply new I/O pipes.
 func (p *Proc) Clone(in io.Reader, out, outErr io.Writer) *Proc {
 	return &Proc{
 		prog: p.prog.Clone(),

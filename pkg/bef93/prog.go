@@ -9,6 +9,7 @@ import (
 	"unicode"
 )
 
+// default program size
 const (
 	Width  = 80
 	Height = 25
@@ -39,20 +40,23 @@ type Opts struct {
 	// Allow code of arbitrary size, code smaller
 	// than standard size will be padded to standard size.
 	AllowArbitraryCodeSize bool
-	// Allow unicode, this also allow
-	// writing/reading uniode via 'p' and 'g' ops.
+	// Allow unicode in the interpreted code as well as in
+	// I/O operations (encoded to utf-8).
 	AllowUnicode bool
 	// Terminate on division by 0.
 	DisallowDivZero bool
 	// Fixed random seed. If 0, the generator
 	// is seeded randomly internally.
+	// This allows to deterministically execute programs containing
+	// random operations.
 	RandSeed int64
-	// Terminate on IO errors instead of ignoring them.
+	// Terminate on I/O errors instead of ignoring them.
 	TerminateOnIOErr bool
 }
 
 // Prog represents a Befunge-93 program.
 // Use NewProg() to get an instance.
+// Do not copy by value, use prog.Clone() to obtain copies.
 type Prog struct {
 	code [][]rune
 	w, h int
@@ -88,28 +92,31 @@ func getMaxSize(lines []string) (w, h int) {
 	return
 }
 
+// Common errors returned by NewProg().
+// Will be wrapped in a CompilationError, so use errors.Is/As().
 var (
 	ErrNotASCII = errors.New("code contains non-ascii characters")
 	ErrTooLarge = errors.New("program code is too large")
 )
 
+// NewProg creates a new program from source code and options.
 func NewProg(code string, opts Opts) (*Prog, error) {
 	lines := strings.Split(code, "\n")
 
 	if !opts.AllowUnicode {
 		ok, x, y := isASCII(lines)
 		if !ok {
-			return nil, NewCompilationError(ErrNotASCII, x, y)
+			return nil, newCompilationError(ErrNotASCII, x, y)
 		}
 	}
 
 	w, h := getMaxSize(lines)
 	if !opts.AllowArbitraryCodeSize && (w > Width || h > Height) {
-		return nil, NewCompilationError(ErrTooLarge, w, h)
+		return nil, newCompilationError(ErrTooLarge, w, h)
 	}
 
 	if !opts.AllowArbitraryCodeSize && (w > Width || h > Height) {
-		return nil, NewCompilationError(ErrTooLarge, w, h)
+		return nil, newCompilationError(ErrTooLarge, w, h)
 	}
 	if w < Width {
 		w = Width
@@ -183,6 +190,7 @@ func (p *Prog) String() string {
 	return b.String()
 }
 
+// Code returns the source code of this program.
 func (p *Prog) Code() string {
 	ret := strings.Builder{}
 	for _, l := range p.code {
@@ -192,10 +200,12 @@ func (p *Prog) Code() string {
 	return strings.TrimSpace(ret.String())
 }
 
+// Opts returns the options of this program.
 func (p *Prog) Opts() Opts {
 	return p.opts
 }
 
+// Clone returns a pointer to a deep copy of a prog.
 func (p *Prog) Clone() Prog {
 	code := make([][]rune, p.h)
 	for i, line := range p.code {

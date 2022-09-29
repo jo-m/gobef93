@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+// Common errors returned by Exec().
+// Will be wrapped in a RuntimeError, so use errors.Is/As().
 var (
 	ErrTerminated    = errors.New("process already executed")
 	ErrUnknownOpCode = errors.New("unknown opcode")
@@ -21,6 +23,11 @@ var (
 	errTerminated = errors.New("process terminated")
 )
 
+// Exec executes a process.
+// Can loop forever if the contained program does so.
+// Returns nil on successful termination.
+// Exec() can be called only once on a proc.
+// You need to construct a new proc to execute again.
 func (p *Proc) Exec() error {
 	if p.done {
 		return ErrTerminated

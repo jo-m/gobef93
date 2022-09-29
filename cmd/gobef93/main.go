@@ -1,3 +1,6 @@
+/*
+Package main is a simple CLI frontend for the gobef93 Befunge interpreter.
+*/
 package main
 
 import (
