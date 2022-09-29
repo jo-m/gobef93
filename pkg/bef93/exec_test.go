@@ -312,6 +312,25 @@ v   <
 	}
 }
 
+func Test_Exec_Put_OutOfBounds(t *testing.T) {
+	code := strings.TrimSpace(`999** 999** 7 p 999** 999** g .@`)
+	out, _, err := exec2out(t, code, Opts{}, "")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	if out != "0 " {
+		t.Fatal("should be equal")
+	}
+}
+
+func Test_Exec_Put_OutOfBounds_Err(t *testing.T) {
+	code := strings.TrimSpace(`999** 999** 7 p`)
+	_, _, err := exec2out(t, code, Opts{TerminateOnPutGetOutOfBounds: true}, "")
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+}
+
 func Test_Exec_Get(t *testing.T) {
 	code := strings.TrimSpace(`
 83g,@
@@ -325,6 +344,22 @@ func Test_Exec_Get(t *testing.T) {
 	}
 	if out != "7" {
 		t.Fatal("should be equal")
+	}
+}
+
+func Test_Exec_Get_OutOfBounds(t *testing.T) {
+	out, _, err := exec2out(t, `999** 999** g . @`, Opts{}, "")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	if out != "0 " {
+		t.Fatal("should be equal")
+	}
+}
+func Test_Exec_Get_OutOfBounds_Err(t *testing.T) {
+	_, _, err := exec2out(t, `999**999**g.@`, Opts{TerminateOnPutGetOutOfBounds: true}, "")
+	if err == nil {
+		t.Fatalf("expected error")
 	}
 }
 

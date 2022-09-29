@@ -16,6 +16,7 @@ var (
 	ErrUnknownOpCode = errors.New("unknown opcode")
 	ErrDivZero       = errors.New("division by zero")
 	ErrWroteNothing  = errors.New("wrote 0 bytes")
+	ErrOutOfBounds   = errors.New("'p' or 'g' operation out of bounds")
 )
 
 var (
@@ -229,24 +230,34 @@ func (p *Proc) handleOp(op opcode) error {
 	case opPut:
 		y, x := p.stack.pop2()
 		val := p.stack.pop()
-		// TODO handle out of bounds
-		y = (y + int64(p.prog.h)) % int64(p.prog.h)
-		x = (x + int64(p.prog.w)) % int64(p.prog.w)
-		if !p.prog.opts.AllowUnicode {
-			p.prog.code[y][x] = rune(byte(val))
+		outOfBounds := x > int64(p.prog.h) || x < 0 || y > int64(p.prog.w) || y < 0
+		if outOfBounds {
+			if p.prog.opts.TerminateOnPutGetOutOfBounds {
+				return p.newRuntimeError(ErrOutOfBounds)
+			}
+			// do nothing
 		} else {
-			p.prog.code[y][x] = rune(val)
+			if !p.prog.opts.AllowUnicode {
+				p.prog.code[y][x] = rune(byte(val))
+			} else {
+				p.prog.code[y][x] = rune(val)
+			}
 		}
 	case opGet:
 		y, x := p.stack.pop2()
-		// TODO handle out of bounds
-		y = (y + int64(p.prog.h)) % int64(p.prog.h)
-		x = (x + int64(p.prog.w)) % int64(p.prog.w)
-		val := p.prog.code[y][x]
-		if !p.prog.opts.AllowUnicode {
-			p.stack.push(int64(byte(val)))
+		outOfBounds := x > int64(p.prog.h) || x < 0 || y > int64(p.prog.w) || y < 0
+		if outOfBounds {
+			if p.prog.opts.TerminateOnPutGetOutOfBounds {
+				return p.newRuntimeError(ErrOutOfBounds)
+			}
+			p.stack.push(0)
 		} else {
-			p.stack.push(int64(val))
+			val := p.prog.code[y][x]
+			if !p.prog.opts.AllowUnicode {
+				p.stack.push(int64(byte(val)))
+			} else {
+				p.stack.push(int64(val))
+			}
 		}
 	case opReadNr:
 		val, err := readInt(p.in)

@@ -52,6 +52,8 @@ type Opts struct {
 	RandSeed int64
 	// Terminate on I/O errors instead of ignoring them.
 	TerminateOnIOErr bool
+	// Terminate if a 'g' or 'p' operation is out of bounds, instead of pushing 0 or discading the pop() value.
+	TerminateOnPutGetOutOfBounds bool
 }
 
 // Prog represents a Befunge-93 program.
