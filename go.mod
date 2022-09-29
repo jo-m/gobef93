@@ -1,3 +1,3 @@
-module github.com/jo-m/gobefunge
+module github.com/jo-m/gobef93
 
 go 1.19

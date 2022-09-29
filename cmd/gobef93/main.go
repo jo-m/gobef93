@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jo-m/gobefunge/pkg/bef93"
+	"github.com/jo-m/gobef93/pkg/bef93"
 )
 
 const code = `&&..@`
