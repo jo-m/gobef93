@@ -1,6 +1,7 @@
 package bef93
 
 import (
+	"bufio"
 	"io"
 	"math/rand"
 	"sync"
@@ -10,7 +11,7 @@ import (
 type Proc struct {
 	prog Prog
 
-	in          io.Reader
+	in          *bufio.Reader
 	out, outErr io.Writer
 
 	rand *rand.Rand
@@ -36,7 +37,7 @@ func NewProc(prog *Prog, in io.Reader, out, outErr io.Writer) *Proc {
 
 		rand: rand.New(rand.NewSource(seed)),
 
-		in:     in,
+		in:     bufio.NewReader(in),
 		out:    out,
 		outErr: outErr,
 	}
@@ -51,7 +52,7 @@ func (p *Proc) Clone(in io.Reader, out, outErr io.Writer) *Proc {
 	return &Proc{
 		prog: p.prog.Clone(),
 
-		in:     in,
+		in:     bufio.NewReader(in),
 		out:    out,
 		outErr: outErr,
 

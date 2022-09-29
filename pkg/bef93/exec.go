@@ -85,13 +85,14 @@ func (p *Proc) step() error {
 	return nil
 }
 
-func readInt(in io.Reader) (int64, error) {
-	r := bufio.NewReader(in)
-	l, _, err := r.ReadLine()
-	if err != nil {
+func readInt(in *bufio.Reader) (int64, error) {
+	l, err := in.ReadString('\n')
+
+	if err != nil && (len(l) == 0 || err != io.EOF) {
 		return 0, err
 	}
-	val, err := strconv.ParseInt(string(l), 10, 64)
+
+	val, err := strconv.ParseInt(strings.TrimSpace(l), 10, 64)
 	if err != nil {
 		return 0, err
 	}
