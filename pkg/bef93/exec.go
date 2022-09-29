@@ -121,26 +121,25 @@ func (p *Proc) handleOp(op opcode) error {
 		p.stack.push(a * b)
 	case opDiv:
 		a, b := p.stack.pop2()
-		if a == 0 {
-			if p.prog.opts.DisallowDivZero {
-				return p.newRuntimeError(fmt.Errorf("%w: %d / %d", ErrDivZero, a, b))
-			}
-
-			fmt.Fprintf(p.outErr, "What do you want %d/0 to be?\n", b)
-			b, err := readInt(p.in)
-			if err != nil {
-				if p.prog.opts.TerminateOnIOErr {
-					return p.newRuntimeError(err)
-				}
-
-				b = 0
-			}
-
-			p.stack.push(b)
-		} else {
+		if a != 0 {
 			p.stack.push(b / a)
+			return nil
 		}
 
+		if p.prog.opts.DisallowDivZero {
+			return p.newRuntimeError(fmt.Errorf("%w: %d / %d", ErrDivZero, a, b))
+		}
+
+		fmt.Fprintf(p.outErr, "What do you want %d/0 to be?\n", b)
+		b, err := readInt(p.in)
+		if err != nil {
+			if p.prog.opts.TerminateOnIOErr {
+				return p.newRuntimeError(err)
+			}
+
+			b = 0
+		}
+		p.stack.push(b)
 	case opMod:
 		a, b := p.stack.pop2()
 		// in the reference implementation, this is not handled and would crash
@@ -230,34 +229,37 @@ func (p *Proc) handleOp(op opcode) error {
 	case opPut:
 		y, x := p.stack.pop2()
 		val := p.stack.pop()
+
 		outOfBounds := x > int64(p.prog.h) || x < 0 || y > int64(p.prog.w) || y < 0
 		if outOfBounds {
 			if p.prog.opts.TerminateOnPutGetOutOfBounds {
 				return p.newRuntimeError(ErrOutOfBounds)
 			}
-			// do nothing
+			return nil
+		}
+
+		if !p.prog.opts.AllowUnicode {
+			p.prog.code[y][x] = rune(byte(val))
 		} else {
-			if !p.prog.opts.AllowUnicode {
-				p.prog.code[y][x] = rune(byte(val))
-			} else {
-				p.prog.code[y][x] = rune(val)
-			}
+			p.prog.code[y][x] = rune(val)
 		}
 	case opGet:
 		y, x := p.stack.pop2()
 		outOfBounds := x > int64(p.prog.h) || x < 0 || y > int64(p.prog.w) || y < 0
+
 		if outOfBounds {
 			if p.prog.opts.TerminateOnPutGetOutOfBounds {
 				return p.newRuntimeError(ErrOutOfBounds)
 			}
 			p.stack.push(0)
+			return nil
+		}
+
+		val := p.prog.code[y][x]
+		if !p.prog.opts.AllowUnicode {
+			p.stack.push(int64(byte(val)))
 		} else {
-			val := p.prog.code[y][x]
-			if !p.prog.opts.AllowUnicode {
-				p.stack.push(int64(byte(val)))
-			} else {
-				p.stack.push(int64(val))
-			}
+			p.stack.push(int64(val))
 		}
 	case opReadNr:
 		val, err := readInt(p.in)
