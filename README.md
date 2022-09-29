@@ -1,4 +1,4 @@
-# Befunge93 interpreter in Go
+# Golang Befunge93 - now with Unicode support!
 
 (Almost) standard compliant Befunge-93 embeddable runtime.
 A CLI frontend is also available.
