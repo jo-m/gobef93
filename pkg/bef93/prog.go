@@ -18,6 +18,7 @@ const (
 // Opts contains supported options.
 // See https://github.com/catseye/Befunge-93/blob/master/src/bef.c#L46.
 // Zero value is good to use and represents the default (standard 93) options.
+// If you update docstrings and options here, also update them in main.go.
 type Opts struct {
 	// Options (mostly) equal to reference implementation.
 
