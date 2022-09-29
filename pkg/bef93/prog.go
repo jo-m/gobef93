@@ -40,8 +40,9 @@ type Opts struct {
 	// Allow code of arbitrary size, code smaller
 	// than standard size will be padded to standard size.
 	AllowArbitraryCodeSize bool
-	// Allow unicode in the interpreted code as well as in
-	// I/O operations (encoded to utf-8).
+	// Allow unicode in the interpreted code.
+	// This also allows the 'g' and 'p' operators to load/store unicode runes,
+	// and the ',' and '~' operators to write/read unicode runes (utf-8 encoded).
 	AllowUnicode bool
 	// Terminate on division by 0.
 	DisallowDivZero bool

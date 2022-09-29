@@ -19,5 +19,4 @@ CLI usage: TODO
 - [ ] allow to step
 - [ ] time travel mode
 - [ ] better traceability and debugging tools
-- [ ] handle TODOs littered in the code
 - [ ] installation & CLI usage

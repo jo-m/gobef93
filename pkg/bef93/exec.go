@@ -7,16 +7,18 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 // Common errors returned by Exec().
 // Will be wrapped in a RuntimeError, so use errors.Is/As().
 var (
-	ErrTerminated    = errors.New("process already executed")
-	ErrUnknownOpCode = errors.New("unknown opcode")
-	ErrDivZero       = errors.New("division by zero")
-	ErrWroteNothing  = errors.New("wrote 0 bytes")
-	ErrOutOfBounds   = errors.New("'p' or 'g' operation out of bounds")
+	ErrTerminated     = errors.New("process already executed")
+	ErrUnknownOpCode  = errors.New("unknown opcode")
+	ErrDivZero        = errors.New("division by zero")
+	ErrWroteNothing   = errors.New("wrote 0 bytes")
+	ErrOutOfBounds    = errors.New("'p' or 'g' operation out of bounds")
+	ErrInvalidUnicode = errors.New("unable to decode input as valid utf-8 unicode")
 )
 
 var (
@@ -280,18 +282,38 @@ func (p *Proc) handleOp(op opcode) error {
 		}
 		p.stack.push(val)
 	case opReadChr:
-		// TODO: this does not allow unicode
-		buf := []byte{0}
-		n, err := p.in.Read(buf)
-		if err != nil && p.prog.opts.TerminateOnIOErr {
-			return p.newRuntimeError(err)
+		if !p.prog.opts.AllowUnicode {
+			b, err := p.in.ReadByte()
+			if err != nil {
+				if p.prog.opts.TerminateOnIOErr {
+					return p.newRuntimeError(err)
+				} else {
+					// simulate EOF
+					p.stack.push(-1)
+					return nil
+				}
+			}
+
+			p.stack.push(int64(b))
+			return nil
 		}
-		if n == 0 || err != nil {
-			// simulate EOF
-			p.stack.push(-1)
-		} else {
-			p.stack.push(int64(buf[0]))
+
+		// handle unicode
+		r, _, err := p.in.ReadRune()
+		if r == unicode.ReplacementChar {
+			err = ErrInvalidUnicode
 		}
+		if err != nil {
+			if p.prog.opts.TerminateOnIOErr {
+				return p.newRuntimeError(err)
+			} else {
+				// simulate EOF
+				p.stack.push(-1)
+				return nil
+			}
+		}
+
+		p.stack.push(int64(r))
 	case opEnd:
 		return errTerminated
 	case opWhitespace:

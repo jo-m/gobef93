@@ -400,3 +400,58 @@ func Test_Exec_Wraparound(t *testing.T) {
 		t.Fatal("should be equal")
 	}
 }
+
+func Test_Exec_Unicode_Code(t *testing.T) {
+	code := `"dlröW olläH вба",,,,,,,,,,,,,,,@`
+	out, _, err := exec2out(t, code, Opts{AllowUnicode: true}, "")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	if out != "абв Hällo Wörld" {
+		t.Fatal("should be equal")
+	}
+}
+
+func Test_Exec_Unicode_PutWrite(t *testing.T) {
+	code := strings.TrimSpace(`
+25*25**25**25*7*+4+  1 1 p v
+" "                        <        @,
+`)
+	out, _, err := exec2out(t, code, Opts{AllowUnicode: true}, "")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	if out != "в" {
+		t.Fatal("should be equal")
+	}
+}
+
+func Test_Exec_Unicode_ReadWrite(t *testing.T) {
+	code := strings.TrimSpace(`~~~,,,@`)
+	out, _, err := exec2out(t, code, Opts{AllowUnicode: true}, "aвc")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	if out != "cвa" {
+		t.Fatal("should be equal")
+	}
+}
+
+func Test_Exec_Unicode_Read_InvalidUtf8(t *testing.T) {
+	code := strings.TrimSpace(`~.@`)
+	out, _, err := exec2out(t, code, Opts{AllowUnicode: true}, "\xc3\x28")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	if out != "-1 " {
+		t.Fatal("should be equal")
+	}
+}
+
+func Test_Exec_Unicode_Read_InvalidUtf8_Err(t *testing.T) {
+	code := strings.TrimSpace(`~.@`)
+	_, _, err := exec2out(t, code, Opts{AllowUnicode: true, TerminateOnIOErr: true}, "\xc3\x28")
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+}
