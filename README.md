@@ -26,7 +26,7 @@ gobef93 -allow_unicode examples/hello_wörld.bf
 
 ## Embedding
 
-Check [main.go](cmd/main.go) for example usage.
+Check [main.go](cmd/gobef93/main.go) for example usage.
 
 ## TODOs for later
 
