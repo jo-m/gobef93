@@ -287,11 +287,11 @@ func (p *Proc) handleOp(op opcode) error {
 			if err != nil {
 				if p.prog.opts.TerminateOnIOErr {
 					return p.newRuntimeError(err)
-				} else {
-					// simulate EOF
-					p.stack.push(-1)
-					return nil
 				}
+
+				// simulate EOF
+				p.stack.push(-1)
+				return nil
 			}
 
 			p.stack.push(int64(b))
@@ -306,11 +306,11 @@ func (p *Proc) handleOp(op opcode) error {
 		if err != nil {
 			if p.prog.opts.TerminateOnIOErr {
 				return p.newRuntimeError(err)
-			} else {
-				// simulate EOF
-				p.stack.push(-1)
-				return nil
 			}
+
+			// simulate EOF
+			p.stack.push(-1)
+			return nil
 		}
 
 		p.stack.push(int64(r))
