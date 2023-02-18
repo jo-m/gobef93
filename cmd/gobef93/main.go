@@ -55,10 +55,12 @@ For more details on the options, see the docstrings on the bef93.Opts struct.`+"
 }
 
 func mustGetCode(fileName string) string {
+	// #nosec G304
 	file, err := os.Open(fileName)
 	if err != nil {
 		panic(err)
 	}
+	// #nosec G307
 	defer file.Close()
 
 	code, err := io.ReadAll(file)

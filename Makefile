@@ -1,24 +1,17 @@
-.PHONY: test format lint check
-
-format:
-	gofmt -w .
-	go mod tidy
+.PHONY: test lint check format bench
 
 test:
-	go test -v -race ./...
+	go test -count 1 -race -v ./...
 
 lint:
 	gofmt -l .; test -z "$$(gofmt -l .)"
-
 	go vet ./...
-	
-	# go install honnef.co/go/tools/cmd/staticcheck@latest
-	staticcheck -checks=all ./...
-	
-	# go install github.com/mgechev/revive@latest
-	revive -set_exit_status ./...
-
-	# go install github.com/securego/gosec/v2/cmd/gosec@latest
-	gosec scan -checks=all ./...
+	go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all ./...
+	go run github.com/mgechev/revive@latest -set_exit_status ./...
+	go run github.com/securego/gosec/v2/cmd/gosec@latest ./...
+	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
 check: lint test
+
+format:
+	gofmt -w -s .
