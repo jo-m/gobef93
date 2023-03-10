@@ -18,7 +18,7 @@ const (
 // Opts contains supported options.
 // See https://github.com/catseye/Befunge-93/blob/master/src/bef.c#L46.
 // Zero value is good to use and represents the default (standard 93) options.
-// If you update docstrings and options here, also update them in main.go.
+// Dev: If you update docstrings and options here, also update them in main.go.
 type Opts struct {
 	// Options (mostly) equal to reference implementation.
 
@@ -27,9 +27,9 @@ type Opts struct {
 	// If true, & will push an undefined number to stack instead of -1.
 	ReadErrorUndefined bool
 	// If true, unsupported instructions will be ignored.
-	// Note that unline the reference implementation, we
-	// terminate instead of just print an error on unsupported
-	// instructions by default.
+	// By default (false), we terminate on unsupported instructions.
+	// This is unlike the reference implementation, which will just print an error
+	// and continue.
 	IgnoreUnsupportedInstructions bool
 	// TODO: implement.
 	WrapLongLines bool
