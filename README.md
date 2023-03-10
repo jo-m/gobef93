@@ -33,3 +33,4 @@ Check [main.go](cmd/gobef93/main.go) for example usage.
 - [ ] allow to step
 - [ ] time travel mode
 - [ ] better traceability and debugging tools
+- [ ] implement remaining options
