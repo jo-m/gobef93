@@ -1,4 +1,4 @@
-# Golang Befunge93 - now with Unicode support!
+# Golang Befunge93 - With Unicode support!
 
 (Almost) standard compliant Befunge-93 embeddable runtime.
 A CLI frontend is also available.
@@ -6,14 +6,13 @@ Read more about Befunge [here](https://github.com/catseye/Befunge-93).
 
 Features:
 
-* No dependencies!
+* No dependencies but Go stdlib.
 * Unicode support.
 * Improved error handling.
 * Deterministic randomness.
 * Not turing complete. Eat that, [Starlark](https://github.com/bazelbuild/starlark).
 
 Using the default options, this implementation is almost completely identical to the reference implementation.
-We lack some option flags but add some new ones, and IO is handled slightly differently.
 
 Get started:
 
@@ -28,9 +27,9 @@ gobef93 -allow_unicode examples/hello_wörld.bf
 
 Check [main.go](cmd/gobef93/main.go) for example usage.
 
-## TODOs for later
+## TODOs and ideas
 
-- [ ] allow to step
-- [ ] time travel mode
-- [ ] better traceability and debugging tools
-- [ ] implement remaining options
+- [ ] Allow to step
+- [ ] Time travel mode
+- [ ] Better traceability and debugging tools
+- [ ] Implement remaining options (see TODOs in `pkg/bef93/prog.go`)

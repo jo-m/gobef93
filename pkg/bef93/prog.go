@@ -20,7 +20,7 @@ const (
 // Zero value is good to use and represents the default (standard 93) options.
 // Dev: If you update docstrings and options here, also update them in main.go.
 type Opts struct {
-	// Options (mostly) equal to reference implementation.
+	// Options from the standard/reference implementation.
 
 	// TODO: implement.
 	NoFixOffByOne bool
@@ -36,10 +36,10 @@ type Opts struct {
 	// TODO: implement.
 	WrapHashInconsistently bool
 
-	// Non-standard options.
+	// Our custom additional options.
 
-	// Allow code of arbitrary size, code smaller
-	// than standard size will be padded to standard size.
+	// Allow code of arbitrary size.
+	// Code smaller than standard size will be padded to standard size.
 	AllowArbitraryCodeSize bool
 	// Allow unicode in the interpreted code.
 	// This also allows the 'g' and 'p' operators to load/store unicode runes,
