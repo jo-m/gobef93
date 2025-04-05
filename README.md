@@ -17,7 +17,7 @@ Using the default options, this implementation is almost completely identical to
 Get started:
 
 ```bash
-go install github.com/jo-m/gobef93/cmd/gobef93@latest
+go install jo-m.ch/go/gobef93/cmd/gobef93@latest
 gobef93 -help
 gobef93 examples/hello_world.bf
 gobef93 -allow_unicode examples/hello_wörld.bf

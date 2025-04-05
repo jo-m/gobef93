@@ -9,7 +9,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/jo-m/gobef93/pkg/bef93"
+	"jo-m.ch/go/gobef93/pkg/bef93"
 )
 
 type mainOpts struct {
